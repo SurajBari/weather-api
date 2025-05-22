@@ -1,0 +1,55 @@
+import requests
+from tkinter import *
+from tkinter import messagebox
+
+# ✅ Free Weatherstack API key
+API_KEY = "6f10d403a482433041acb31466a5b49f"  # Replace with your real API key
+
+def get_weather():
+    city = city_entry.get()
+    if not city:
+        messagebox.showwarning("Input Error", "Please enter a city name.")
+        return
+
+    url = f"http://api.weatherstack.com/current?access_key={API_KEY}&query={city}"
+
+    try:
+        response = requests.get(url)
+        data = response.json()
+
+        if "error" in data:
+            weather_info.set("City not found or API limit reached.")
+        else:
+            location = data["location"]["name"]
+            country = data["location"]["country"]
+            temp = data["current"]["temperature"]
+            condition = data["current"]["weather_descriptions"][0]
+            humidity = data["current"]["humidity"]
+            wind_speed = data["current"]["wind_speed"]
+
+            weather = (f"Weather in {location}, {country}:\n"
+                       f"Temperature: {temp}°C\n"
+                       f"Condition: {condition}\n"
+                       f"Humidity: {humidity}%\n"
+                       f"Wind Speed: {wind_speed} km/h")
+
+            weather_info.set(weather)
+    except Exception as e:
+        weather_info.set("Error retrieving data.")
+        print("Error:", e)
+
+# 🖼️ Tkinter GUI
+root = Tk()
+root.title("Weather App (Weatherstack)")
+root.geometry("400x300")
+root.config(bg="#f2f2f2")
+
+city_entry = Entry(root, font=("Arial", 16))
+city_entry.pack(pady=20)
+
+Button(root, text="Get Weather", command=get_weather, font=("Arial", 14), bg="#2a9df4", fg="white").pack()
+
+weather_info = StringVar()
+Label(root, textvariable=weather_info, wraplength=350, font=("Arial", 12), bg="#f2f2f2").pack(pady=20)
+
+root.mainloop()
